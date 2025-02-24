@@ -7,7 +7,7 @@ app = FastAPI()
 
 class Query(BaseModel):
     question: str
-    search_type: str = "semantic"  # or "keyword"
+    search_type: str = "semantic" 
 
 @app.post("/upload/")
 async def upload_document(
@@ -16,12 +16,10 @@ async def upload_document(
     url: str = Form(None)
 ):
     try:
-        # Read file content immediately (before background task)
         content_bytes = None
         if file:
             content_bytes = await file.read()
         
-        # Pass content_bytes and url to background task
         background_tasks.add_task(
             process_document, 
             content_bytes=content_bytes, 
