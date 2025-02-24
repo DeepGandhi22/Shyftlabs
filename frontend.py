@@ -24,7 +24,7 @@ with st.expander("Upload Documents"):
             if url:
                 response = requests.post(
                     "http://localhost:8000/upload/",
-                    data={"url": url},  # Send URL as form data
+                    data={"url": url}, 
                     headers={"Content-Type": "application/x-www-form-urlencoded"}
                 )
                 if response.status_code == 200:
@@ -32,7 +32,6 @@ with st.expander("Upload Documents"):
                 else:
                     st.error(f"Error: {response.json().get('detail', 'Unknown error')}")
 
-# Query Section
 question = st.text_input("Enter your question")
 search_type = st.selectbox("Search Type", ["semantic", "keyword"])
 
@@ -44,7 +43,7 @@ if st.button("Ask"):
                 json={"question": question, "search_type": search_type},
                 stream=True
             )
-            response.raise_for_status()  # Raise an error for bad status codes
+            response.raise_for_status() 
             
             answer_container = st.empty()
             full_answer = ""

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form, BackgroundTasks
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from backend import process_document, hybrid_retriever, generate_answer
@@ -11,12 +11,24 @@ class Query(BaseModel):
 
 @app.post("/upload/")
 async def upload_document(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(None),
-    url: str = Form(None)  # Accept URL as form data
+    url: str = Form(None)
 ):
     try:
-        result = process_document(file, url)
-        return {"status": "success", "documents_processed": result}
+        # Read file content immediately (before background task)
+        content_bytes = None
+        if file:
+            content_bytes = await file.read()
+        
+        # Pass content_bytes and url to background task
+        background_tasks.add_task(
+            process_document, 
+            content_bytes=content_bytes, 
+            url=url,
+            filename=file.filename if file else None
+        )
+        return {"status": "processing_started"}
     except Exception as e:
         raise HTTPException(500, f"Processing error: {str(e)}")
 
